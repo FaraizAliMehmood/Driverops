@@ -1,6 +1,7 @@
-import { Plane, RefreshCw } from "lucide-react";
+import { Plane, RefreshCw, Map } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardHeaderProps {
   onRefresh?: () => void;
@@ -8,6 +9,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader = ({ onRefresh, lastUpdated }: DashboardHeaderProps) => {
+  const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString('en-SG', { 
     hour: '2-digit', 
     minute: '2-digit',
@@ -55,6 +57,15 @@ const DashboardHeader = ({ onRefresh, lastUpdated }: DashboardHeaderProps) => {
         </div>
         
         <div className="flex items-center gap-3 sm:gap-4">
+          {/* <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => navigate('/zones')}
+            className="border-primary/40 hover:bg-primary/10"
+          >
+            <Map className="w-4 h-4 mr-2" />
+            <span className="hidden sm:inline">Zones</span>
+          </Button> */}
           <Button 
             variant="outline" 
             size="sm"
