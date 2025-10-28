@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, TrendingUp, Clock, Moon, Train } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { MapPin, TrendingUp, Clock, Moon, Train, Navigation } from "lucide-react";
 import { useState, useEffect } from "react";
 
 interface Zone {
@@ -12,6 +13,7 @@ interface Zone {
   color: "success" | "info" | "warning";
   icon?: "moon" | "train";
   timeRestriction?: { start: number; end: number };
+  coordinates: { lat: number; lng: number };
 }
 
 const getTimeBasedZones = (currentHour: number): Zone[] => {
@@ -23,6 +25,7 @@ const getTimeBasedZones = (currentHour: number): Zone[] => {
       eta: "15 min",
       multiplier: "1.8x",
       color: "success",
+      coordinates: { lat: 1.3644, lng: 103.9915 }, // Changi Airport Terminal 3
     },
     {
       name: "Marina Bay / CBD",
@@ -31,6 +34,7 @@ const getTimeBasedZones = (currentHour: number): Zone[] => {
       eta: "25 min",
       multiplier: "1.3x",
       color: "info",
+      coordinates: { lat: 1.2834, lng: 103.8607 }, // Marina Bay Sands
     },
     {
       name: "Orchard Road",
@@ -39,6 +43,7 @@ const getTimeBasedZones = (currentHour: number): Zone[] => {
       eta: "20 min",
       multiplier: "1.1x",
       color: "warning",
+      coordinates: { lat: 1.3048, lng: 103.8318 }, // Orchard Central
     },
   ];
 
@@ -53,6 +58,7 @@ const getTimeBasedZones = (currentHour: number): Zone[] => {
       color: "info",
       icon: "moon",
       timeRestriction: { start: 18, end: 24 },
+      coordinates: { lat: 1.4043, lng: 103.7900 }, // Singapore Night Safari
     });
   }
 
@@ -67,6 +73,7 @@ const getTimeBasedZones = (currentHour: number): Zone[] => {
       color: "success",
       icon: "train",
       timeRestriction: { start: 7, end: 20 },
+      coordinates: { lat: 1.4370, lng: 103.7862 }, // Woodlands Checkpoint
     });
   }
 
@@ -91,6 +98,30 @@ const ZoneRecommendation = () => {
 
     return () => clearInterval(interval);
   }, [currentHour]);
+
+  const handleNavigate = (zone: Zone) => {
+    const { lat, lng } = zone.coordinates;
+    const destination = `${lat},${lng}`;
+    
+    // Detect if user is on iOS or Android
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+    
+    let url: string;
+    
+    if (isIOS) {
+      // Use Apple Maps on iOS
+      url = `maps://maps.apple.com/?daddr=${destination}&dirflg=d`;
+    } else if (isAndroid) {
+      // Use Google Maps on Android
+      url = `google.navigation:q=${destination}`;
+    } else {
+      // Use Google Maps web for desktop/other
+      url = `https://www.google.com/maps/dir/?api=1&destination=${destination}&travelmode=driving`;
+    }
+    
+    window.open(url, '_blank');
+  };
 
   return (
     <Card className="glass-card p-4 sm:p-6 border-2 border-success/20 glow-primary">
@@ -131,7 +162,7 @@ const ZoneRecommendation = () => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between mt-3 sm:mt-4 pt-3 border-t border-border/30 gap-2">
+            <div className="flex items-center justify-between mt-3 sm:mt-4 pt-3 border-t border-border/30 gap-2 flex-wrap">
               <div className="flex items-center gap-3 sm:gap-4 text-xs sm:text-sm">
                 <div className="flex items-center gap-1 text-muted-foreground">
                   <Clock className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -142,11 +173,21 @@ const ZoneRecommendation = () => {
                   <span className="text-success font-bold">{zone.multiplier}</span>
                 </div>
               </div>
-              {zone.priority === "High" && (
-                <Badge className="bg-success text-success-foreground font-bold text-xs flex-shrink-0">
-                  BEST CHOICE
-                </Badge>
-              )}
+              <div className="flex items-center gap-2">
+                {zone.priority === "High" && (
+                  <Badge className="bg-success text-success-foreground font-bold text-xs flex-shrink-0">
+                    BEST CHOICE
+                  </Badge>
+                )}
+                <Button 
+                  size="sm"
+                  onClick={() => handleNavigate(zone)}
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground flex items-center gap-1.5 h-8"
+                >
+                  <Navigation className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <span className="text-xs sm:text-sm">Navigate</span>
+                </Button>
+              </div>
             </div>
           </div>
         ))}
