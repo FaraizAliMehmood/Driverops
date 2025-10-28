@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 220 26% 8%;
+    --foreground: 210 40% 98%;
+
+    --card: 220 24% 12%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 220 26% 10%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 142 76% 45%;
+    --primary-foreground: 220 26% 8%;
+
+    --secondary: 200 95% 50%;
+    --secondary-foreground: 220 26% 8%;
+
+    --muted: 220 20% 20%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 0 84% 55%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142 76% 45%;
+    --success-foreground: 220 26% 8%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 220 26% 8%;
+
+    --info: 200 95% 50%;
+    --info-foreground: 220 26% 8%;
+
+    --border: 220 20% 22%;
+    --input: 220 20% 20%;
+    --ring: 142 76% 45%;
+
+    --radius: 0.75rem;
+
+    --gradient-primary: linear-gradient(135deg, hsl(142 76% 45%), hsl(200 95% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(200 95% 50%), hsl(0 84% 55%));
+    --gradient-success: linear-gradient(135deg, hsl(142 76% 45%), hsl(142 76% 35%));
+    --gradient-hero: linear-gradient(135deg, hsl(142 76% 45% / 0.1), hsl(200 95% 50% / 0.1), hsl(0 84% 55% / 0.05));
+    
+    --glow-primary: 0 0 40px hsl(142 76% 45% / 0.3);
+    --glow-secondary: 0 0 40px hsl(200 95% 50% / 0.3);
+    --glow-accent: 0 0 40px hsl(0 84% 55% / 0.3);
+
+    --sidebar-background: 220 26% 10%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 142 76% 45%;
+    --sidebar-primary-foreground: 220 26% 8%;
+    --sidebar-accent: 220 20% 18%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 220 20% 22%;
+    --sidebar-ring: 142 76% 45%;
+  }
+
+  .dark {
+    --background: 220 26% 8%;
+    --foreground: 210 40% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-sm bg-card/50 border border-border/50;
+  }
+
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+
+  .glow-secondary {
+    box-shadow: var(--glow-secondary);
+  }
+
+  .glow-accent {
+    box-shadow: var(--glow-accent);
+  }
+
+  .gradient-text {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}
