@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface CurrentWeather {
   temperature: number;
@@ -12,8 +12,9 @@ export const useWeather = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchWeather = async () => {
+  const fetchWeather = useCallback(async () => {
     try {
+      setLoading(true);
       setError(null);
       const res = await fetch(
         "https://api.open-meteo.com/v1/forecast?latitude=1.3644&longitude=103.9915&current_weather=true"
@@ -25,20 +26,19 @@ export const useWeather = () => {
       
       const data = await res.json();
       setWeather(data.current_weather);
-      setLoading(false);
     } catch (err) {
       console.error('Weather fetch error:', err);
       setError(err instanceof Error ? err.message : 'Failed to load weather');
-      setLoading(false);
     }
-  };
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     fetchWeather();
     const interval = setInterval(fetchWeather, 1800000); // every 30 min
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchWeather]);
 
-  return { weather, loading, error };
+  return { weather, loading, error, refresh: fetchWeather };
 };
 

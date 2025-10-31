@@ -1,3 +1,4 @@
+import { forwardRef, useImperativeHandle } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CloudRain, Wind, Droplets, TrendingUp, MapPin, Cloud, CloudDrizzle, Sun, Loader2 } from "lucide-react";
@@ -40,8 +41,14 @@ const getWindDescription = (speed: number): string => {
   return "Very Strong";
 };
 
-const WeatherAlert = () => {
-  const { weather, loading, error } = useWeather();
+export type WeatherAlertHandle = {
+  refresh: () => void;
+};
+
+const WeatherAlert = forwardRef<WeatherAlertHandle>((_, ref) => {
+  const { weather, loading, error, refresh } = useWeather();
+
+  useImperativeHandle(ref, () => ({ refresh }), [refresh]);
   // Get weather info
   const weatherInfo = weather ? getWeatherDescription(weather.weathercode) : null;
   const baseSurge = weatherInfo ? getSurgeFromWeather(weatherInfo.severity) : 8;
@@ -184,6 +191,8 @@ const WeatherAlert = () => {
       )}
     </Card>
   );
-};
+});
+
+WeatherAlert.displayName = "WeatherAlert";
 
 export default WeatherAlert;

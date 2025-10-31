@@ -1,7 +1,8 @@
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plane, Users, TrendingUp, AlertCircle, Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from "react";
+import axios from "axios";
 
 interface Flight {
   flightNo: string;
@@ -82,23 +83,66 @@ const calculateETA = (altitude: string, velocity: string): string => {
   return "35 min";
 };
 
-const FlightFeed = () => {
+const getChangiArrivals = async (): Promise<ApiFlightData[]> => {
+  const url =
+    "https://opensky-network.org/api/states/all?lamin=1.0&lomin=103.5&lamax=1.6&lomax=104.2";
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+      },
+    });
+
+    console.log(
+      `Fetched ${
+        response.data.states ? response.data.states.length : 0
+      } current flights in Singapore airspace`
+    );
+
+    if (!response.data.states) {
+      return [];
+    }
+
+    return response.data.states.map((state: any) => ({
+      callsign: state[1] ? state[1].trim() : "N/A",
+      icao24: state[0],
+      origin_country: state[2],
+      longitude: state[5],
+      latitude: state[6],
+      altitude: state[7] ? `${Math.round(state[7])} m` : "N/A",
+      velocity: state[9] ? `${Math.round(state[9])} m/s` : "N/A",
+      on_ground: state[8],
+    }));
+  } catch (error: any) {
+    if (error.response) {
+      console.error(
+        "Error fetching OpenSky data:",
+        error.response.status,
+        error.response.statusText
+      );
+      console.error("Response data:", error.response.data);
+    } else {
+      console.error("Error fetching OpenSky data:", error.message);
+    }
+    return [];
+  }
+};
+
+export type FlightFeedHandle = {
+  refresh: () => void;
+};
+
+const FlightFeed = forwardRef<FlightFeedHandle>((_, ref) => {
   const [flights, setFlights] = useState<Flight[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchFlights = async () => {
+  const fetchFlights = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const  BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
-      const response = await fetch(BASE_URL+'/api/flights');
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch flight data');
-      }
-      
-      const data: ApiFlightData[] = await response.json();
+      const data: ApiFlightData[] = await getChangiArrivals();
       
       // Transform API data to match our component's expected format
       const transformedFlights: Flight[] = data.map((apiFlight) => {
@@ -140,7 +184,9 @@ const FlightFeed = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useImperativeHandle(ref, () => ({ refresh: fetchFlights }), [fetchFlights]);
 
   useEffect(() => {
     fetchFlights();
@@ -149,7 +195,7 @@ const FlightFeed = () => {
     const interval = setInterval(fetchFlights, 30000);
     
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchFlights]);
 
   return (
     <Card className="glass-card p-4 sm:p-6 border-2 border-info/20 glow-secondary">
@@ -240,6 +286,8 @@ const FlightFeed = () => {
       </div>
     </Card>
   );
-};
+});
+
+FlightFeed.displayName = "FlightFeed";
 
 export default FlightFeed;
